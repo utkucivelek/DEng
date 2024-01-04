@@ -29,13 +29,16 @@
 					"name": "filter1"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "TotalPaid"
 				},
 				{
 					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
+				"parameters{",
+				"     dataflow_param_fiscalyear as integer (2020)",
+				"}",
 				"source(output(",
 				"          FiscalYear as string,",
 				"          PayrollNumber as string,",
@@ -52,10 +55,10 @@
 				"          BaseSalary as string,",
 				"          PayBasis as string,",
 				"          RegularHours as string,",
-				"          RegularGrossPaid as string,",
+				"          RegularGrossPaid as double,",
 				"          OTHours as string,",
-				"          TotalOTPaid as string,",
-				"          TotalOtherPay as string",
+				"          TotalOTPaid as double,",
+				"          TotalOtherPay as double",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -76,20 +79,20 @@
 				"          BaseSalary as string,",
 				"          PayBasis as string,",
 				"          RegularHours as string,",
-				"          RegularGrossPaid as string,",
+				"          RegularGrossPaid as double,",
 				"          OTHours as string,",
-				"          TotalOTPaid as string,",
-				"          TotalOtherPay as string",
+				"          TotalOTPaid as double,",
+				"          TotalOtherPay as double",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> nycpayrolldata2021",
 				"nycpayrolldata2020, nycpayrolldata2021 union(byName: true)~> union1",
 				"union1 filter(toInteger(FiscalYear) >= $dataflow_param_fiscalyear) ~> filter1",
-				"filter1 derive(TotalPaid = RegularGrossPaid + TotalOTPaid+TotalOtherPay) ~> derivedColumn1",
-				"derivedColumn1 aggregate(groupBy(AgencyName,",
+				"filter1 derive(TotalPaid = RegularGrossPaid + TotalOTPaid + TotalOtherPay) ~> TotalPaid",
+				"TotalPaid aggregate(groupBy(AgencyName,",
 				"          FiscalYear),",
-				"     TotalPaid = ERROR_FUNCTION('')) ~> aggregate1"
+				"     Aggr = sum(TotalPaid)) ~> aggregate1"
 			]
 		}
 	}
